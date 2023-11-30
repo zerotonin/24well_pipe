@@ -178,12 +178,11 @@ class VideoSplitter:
                     print("Couldnt find centres, so using previously known centres for the following frame:")
                     centres = raw_subframe_centres[-1].copy()  # Use copy previously known centres
                 else: print("Error, Couldn't find wells for the first frame of the video. ")
-                raw_subframe_centres.append(centres)
+            raw_subframe_centres.append(centres)
             framecounter+=1
         vid_capture.set(cv.CAP_PROP_POS_FRAMES, 0) # restart the video object
-        geometric_mean_location= np.exp(np.mean(np.log(raw_subframe_centres.squeeze()), axis=0))
-
-        smoothed_subframe_centres = np.tile(geometric_mean_location, (total_frames, 1, 1))
+        geometric_mean_location= np.exp(np.mean(np.log(np.array(raw_subframe_centres).squeeze()), axis=0))
+        smoothed_subframe_centres = np.tile(geometric_mean_location, (int(total_frames), 1, 1))
         
         framecounter=0
         subframes_edge_length= first_subframe_radius*2 # find size of the subframes - radius times 2, plus 1 for the 0 column
@@ -210,7 +209,7 @@ class VideoSplitter:
         #video_writers = initialize_video_writers(width=vid_capture.get(cv.CAP_PROP_FRAME_WIDTH), height=vid_capture.get(cv.CAP_PROP_FRAME_HEIGHT), fps=fps, initial_video_directory = path_to_video, output_directory = path_for_output)
         #print(f"Number of video writers: {len(video_writers)}")
         #print("writing videos")
-        with tqdm(total=n_frames_to_process, desc="Writing Individual Wells", unit="frame") as pbar:
+        with tqdm(total=total_frames, desc="Writing Individual Wells", unit="frame") as pbar:
             while(vid_capture.isOpened()):
                 ret, frame = vid_capture.read()
                 if ret and framecounter<frame_limit:
