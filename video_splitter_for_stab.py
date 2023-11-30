@@ -159,47 +159,35 @@ class VideoSplitter:
 
         raw_subframe_centres = list()
         framecounter=0
-        n_frames_to_process=min(frame_limit, total_frames)
-        #frame_splitters = list()
-        with tqdm(total=n_frames_to_process, desc="Finding Wells", unit="frame") as pbar:
-            while(vid_capture.isOpened()):
-            # vid_capture.read() methods returns a tuple, first element is a bool 
-            # and the second is frame
-
-                if framecounter==frame_limit:
-                    break
-                
-                ret, frame = vid_capture.read()
-                if ret == True:
-                    if framecounter==0:
-                        fs = frameSplitter(frame)
-                        first_subframe_radius = fs.process(mode='radius') # Find radius of circles in firt subframe o that this can remain constant throughout video otherwisse writers wont work
-                    else: fs=frameSplitter(frame, first_frame_radius=first_subframe_radius)
-                    #frame_splitters.append(fs)
-                    if fs.process(mode='centres').all()!=None: # check that it can find centres
-                        centres = fs.process(mode='centres')
-                    elif len(raw_subframe_centres) > 0:
-                        print("Couldnt find centres, so using previously known centres for the following frame:")
-                        centres = raw_subframe_centres[-1].copy()  # Use copy previously known centres
-                    else: print("Error, Couldn't find wells for the first frame of the video. ")
-                    raw_subframe_centres.append(centres)
-                    #print(framecounter)
-                    framecounter = framecounter+1
-                    pbar.update(1) 
-                    ###############
-                    #to display video as I go if wanted
-                    # cv.imshow('Frame',frame)
-                    # key = cv.waitKey(1)
-                    # if key == ord('q'):
-                    #     break
-                    #################
-                else:
-                    break
+        n_frames_to_process=10
+        frames_to_sample=np.linspace(0,total_frames, n_frames_to_process)
+        
+        frame_nos = frames_to_sample/total_frames
+        for frame_no in frame_nos:
+            vid_capture.set(2,frame_no)
+            ret, frame = vid_capture.read()
+            if ret == True:
+                if framecounter==0:
+                    fs = frameSplitter(frame)
+                    first_subframe_radius = fs.process(mode='radius') # Find radius of circles in firt subframe o that this can remain constant throughout video otherwisse writers wont work
+                else: fs=frameSplitter(frame, first_frame_radius=first_subframe_radius)
+                #frame_splitters.append(fs)
+                if fs.process(mode='centres').all()!=None: # check that it can find centres
+                    centres = fs.process(mode='centres')
+                elif len(raw_subframe_centres) > 0:
+                    print("Couldnt find centres, so using previously known centres for the following frame:")
+                    centres = raw_subframe_centres[-1].copy()  # Use copy previously known centres
+                else: print("Error, Couldn't find wells for the first frame of the video. ")
+                raw_subframe_centres.append(centres)
+            framecounter+=1
         vid_capture.set(cv.CAP_PROP_POS_FRAMES, 0) # restart the video object
+        geometric_mean_location= np.exp(np.mean(np.log(raw_subframe_centres.squeeze()), axis=0))
 
+        smoothed_subframe_centres = np.tile(geometric_mean_location, (total_frames, 1, 1))
+        
         framecounter=0
         subframes_edge_length= first_subframe_radius*2 # find size of the subframes - radius times 2, plus 1 for the 0 column
-        raw_subframe_centres_arr = np.array(raw_subframe_centres)
+        # raw_subframe_centres_arr = np.array(raw_subframe_centres)
         #smoothed_subframe_centres = self.butter_lowpass_filter(raw_subframe_centres_arr, cutoff=0.3, fs=fps, order=4)
         #smoothed_subframe_centres = self.no_filter(raw_subframe_centres_arr.squeeze())
         
@@ -208,7 +196,7 @@ class VideoSplitter:
         
         #smoothed_subframe_centres =self.gaussian_filter(raw_subframe_centres_arr.squeeze(),fps)
         #smoothed_subframe_centres =self.median_filter(raw_subframe_centres_arr.squeeze(),fps)
-        smoothed_subframe_centres =self.filter_coordinates(raw_subframe_centres_arr.squeeze())
+        #smoothed_subframe_centres =self.filter_coordinates(raw_subframe_centres_arr.squeeze())
         #smoothed_subframe_centres =self.stabilize_frames(raw_subframe_centres_arr.squeeze(),fps)
         smoothed_subframe_centres = [ smoothed_subframe_centres[i,:,:].squeeze() for i in range(smoothed_subframe_centres.shape[0])]
 
