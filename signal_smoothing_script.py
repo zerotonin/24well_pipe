@@ -11,6 +11,7 @@ from pystackreg import StackReg
 import pickle as pkl
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import gmean
   
 def calculate_window(fps, nseconds=2):
     window = fps*nseconds
@@ -45,14 +46,55 @@ def stabilize_frames( raw_centres, fps):
 
     return stabilized_centres
 
+def replicate_first_pointset(original_array):
+    # Get the shape of the original array
+    n, _, _ = original_array.shape
+
+    # Create a new array by replicating the first frame along the first dimension
+    replicated_array = np.tile(np.median(original_array[0:19, :, :]), (n, 1, 1))
+
+    return replicated_array
+
+def filter_coordinates(coordinates):
+    # Initialize output array with the same shape as input
+    
+    
+    # change_in_x= np.zeros(coordinates.shape[0])
+    # change_in_y= np.zeros(coordinates.shape[0])
+    diff_coordinates = np.diff(coordinates,axis=0)
+    mean_offset = np.mean(diff_coordinates,axis=1)
+    offset_cumsum= np.cumsum(mean_offset,axis=0)
+    offset_cumsum = np.tile(offset_cumsum[:, np.newaxis, :], (1, 24, 1))
+    
+    # for t in range(1, coordinates.shape[0]):
+    #     # Calculate geometric mean change in x and y across all 24 coordinates
+    #     mean_change_x = np.exp(np.mean(np.log(coordinates[t, :, 0] / coordinates[t - 1, :, 0])))
+    #     mean_change_y = np.exp(np.mean(np.log(coordinates[t, :, 1] / coordinates[t - 1, :, 1])))
+
+    #     # Update cumulative sum of geometric mean changes
+    #     change_in_x[t]= mean_change_x
+    #     change_in_y[t] = mean_change_y
+
+    corrected_coordinates= replicate_first_pointset(coordinates)
+    corrected_coordinates[1::,:,:] += offset_cumsum
+    
+    # cumsum_change_x=np.cumsum(change_in_x)
+    # cumsum_change_y=np.cumsum(change_in_y)
+    #     # Update x and y coordinates based on cumulative sums
+    # filtered_array[:,:,0] += cumsum_change_x
+    # filtered_array[:,:,1] += cumsum_change_y
+    return corrected_coordinates
 
 
 
 
-with open('raw_centres.npy', 'rb') as f:
+
+
+
+with open(r'C:\Users\Lindsay\Documents\GitHub\24well_pipe\raw_centres.npy', 'rb') as f:
     raw_signal = np.load(f)
     
-
+filtered_signal= filter_coordinates(raw_signal)
 # Set up the plot
 plt.figure(figsize=(10, 6))
 
@@ -78,3 +120,5 @@ plt.legend()  # Add legend for different points
 
 # Show the plot
 plt.show()
+
+
