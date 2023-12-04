@@ -45,21 +45,29 @@ class frameSplitter:
         
 ####################################
 
+    def find_circles(self, img,scale_percent=30, param1=11, min_radius_factor =40/720, max_radius_factor = 100/720):
+
+        width = int(img.shape[1] * scale_percent/100)
+        height = int(img.shape[0] * scale_percent/100)
+        dim = (width, height)
+        resized = cv.resize(img, dim, interpolation = cv.INTER_AREA)
+        rows = resized.shape[0]
+        gray=img
+        gray = cv.GaussianBlur(gray, (3,3),0)
+        circles_lower_res = cv.HoughCircles(resized, cv.HOUGH_GRADIENT, 1, rows / 8,
+                                param1=param1, param2=61,
+                                minRadius=int(resized.shape[0]*min_radius_factor), 
+                                maxRadius=int(resized.shape[0]*max_radius_factor))
+        if circles_lower_res is not None:
+            #circles_lower_res = np.uint16(np.around(circles_lower_res))
+            scaling_factor = 100 / scale_percent  # Calculate the inverse of the scale_percent
+
+            circles_original_res = circles_lower_res.copy()
+            circles_original_res[:, :, :] *= scaling_factor
+        return(circles_original_res)
+    
 
     
-    def find_circles(self, img, param1=11, min_radius_factor =40/720, max_radius_factor = 100/720):
-        gray=img
-        gray = cv.GaussianBlur(gray, (5,5),0)
-
-        rows = gray.shape[0]
-        circles = cv.HoughCircles(gray, cv.HOUGH_GRADIENT, 1, rows / 8,
-                                param1=param1, param2=61,
-                                minRadius=int(gray.shape[0]*min_radius_factor), 
-                                maxRadius=int(gray.shape[0]*max_radius_factor))
-        return(circles)
-
-
-
 
     def rotate_points(self, points, angle, center):
         """

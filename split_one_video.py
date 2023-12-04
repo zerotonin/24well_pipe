@@ -1,12 +1,13 @@
 from video_splitter import VideoSplitter as vs
 import os
-
+import time
+starttime = time.time()
 # for stab
 # path_for_output = r'd:\ND250fpsOct23\stabilised_first_then_split'
 # path_to_video=r'd:\ND250fpsOct23\Cas9-B1\P1000360_stab.mp4'
 
 # Windows Filepaths for non stab
-path_for_output = r'd:\ND250fpsOct23\split_videos_custom_filter'
+path_for_output = r'd:\ND250fpsOct23\split_videos_hough_resized'
 path_to_video=r'd:\ND250fpsOct23\ND2-A1\P1030820.MP4'
 
 # Linux Filepaths
@@ -20,3 +21,5 @@ splitter = vs(path_to_video, path_for_output,frame_limit=frame_limit)
 #splitter = vs(path_to_video, path_for_output)
 splitter()
 
+
+print("Time Elampsed:",time.time()-starttime)
