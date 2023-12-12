@@ -45,7 +45,7 @@ class frameSplitter:
         
 ####################################
 
-    def find_circles(self, img,scale_percent=30, param1=11, min_radius_factor =40/720, max_radius_factor = 100/720):
+    def find_circles(self, img,scale_percent=10, param1=11, min_radius_factor =40/720, max_radius_factor = 100/720):
 
         width = int(img.shape[1] * scale_percent/100)
         height = int(img.shape[0] * scale_percent/100)
