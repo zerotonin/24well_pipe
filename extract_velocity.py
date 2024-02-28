@@ -83,3 +83,5 @@ class TrainingExtractor:
         first_individual_dfs[first_individual_first_time]
         
         return(file_individual_coords_dict)
+    
+    
