@@ -1,9 +1,12 @@
 import pandas as pd
 import numpy as np
+import os
 
-path_to_data = r'd:\tracking_locations\ts04DLC_resnet50_single_tadpoleNov23shuffle1_1030000.csv'
 
-tracked_data= pd.read_csv(path_to_data)
+filepath = r"D:\split_videos\Cas9-B1\P1000355\ts01DLC_resnet50_single_tadpoleNov23shuffle1_1030000.csv"
+#path_to_data = r'd:\tracking_locations\ts04DLC_resnet50_single_tadpoleNov23shuffle1_1030000.csv'
+
+tracked_data= pd.read_csv(filepath)
 
 class TrainingExtractor:
     def __init__(self, directory, label_file):
