@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# make class so i can run on bash wihth a filename
+
 import numpy as np
 # function to adjust eyeball posistion sif ther eis a low likelihood for the position of an eye
 def adjust_eyes(left_eye_column_in, right_eye_column_in, likelihood_threshold=0.998):

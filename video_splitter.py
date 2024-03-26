@@ -9,7 +9,7 @@ import shutil
 from tqdm import tqdm
 from pystackreg import StackReg
 import pickle as pkl
-
+import argparse
 
 class VideoSplitter:
     def __init__(self, path_to_video, path_for_output, frame_limit=float('inf')):
@@ -17,6 +17,7 @@ class VideoSplitter:
         self.path_for_output = path_for_output
         self.frame_limit = frame_limit
         self.vid_capture = cv.VideoCapture(path_to_video)
+        self.first_subframe_radius=0
 
     def calculate_window(self, fps, nseconds=2):
         window = fps*nseconds
@@ -257,21 +258,22 @@ class VideoSplitter:
         vid_capture.release()
         self.release_video_writers(video_writers)
         cv.destroyAllWindows()
+        self.first_subframe_radius=first_subframe_radius
         #print("Resources released.")
         
     def change_file(self, new_video_filepath):
         self.path_to_video = new_video_filepath
         self.vid_capture = cv.VideoCapture(new_video_filepath)
 
+    def get_well_radius(self):
+        return(self.first_subframe_radius)
+
     def __call__(self):
         self.main()
-    
+        
     def main(self):
         self.create_and_write_subframes(path_to_video=self.path_to_video, path_for_output=self.path_for_output,
                             vid_capture=self.vid_capture,frame_limit=self.frame_limit)
 # Create a video capture object, in this case we are reading the video from a file
 
-
-
-
-
+# next find a way to call the get subframe radius
