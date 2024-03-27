@@ -146,7 +146,7 @@ class VideoSplitter:
         return cropped_images
             
 
-    def create_and_write_subframes(self, path_to_video, path_for_output,vid_capture,frame_limit):
+    def create_and_write_subframes(self, path_to_video, path_for_output,vid_capture,frame_limit, write=True):
         if (vid_capture.isOpened() == False):
             print("Error opening the video file", path_to_video)
             return()
@@ -268,12 +268,12 @@ class VideoSplitter:
     def get_well_radius(self):
         return(self.first_subframe_radius)
 
-    def __call__(self):
-        self.main()
+    def __call__(self,write=True):
+        self.main(write)
         
-    def main(self):
+    def main(self, write):
         self.create_and_write_subframes(path_to_video=self.path_to_video, path_for_output=self.path_for_output,
-                            vid_capture=self.vid_capture,frame_limit=self.frame_limit)
+                            vid_capture=self.vid_capture,frame_limit=self.frame_limit,write=write)
 # Create a video capture object, in this case we are reading the video from a file
 
 # next find a way to call the get subframe radius
